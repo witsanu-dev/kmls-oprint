@@ -46,7 +46,18 @@ try {
 }
 
 // 2. Save into config/database_config.json
-$configFile = __DIR__ . '/../config/database_config.json';
+$configDir = __DIR__ . '/../config';
+if (!file_exists($configDir)) {
+    @mkdir($configDir, 0777, true);
+}
+
+$configFile = $configDir . '/database_config.json';
+
+// Try granting write permission if file exists
+if (file_exists($configFile)) {
+    @chmod($configFile, 0777);
+}
+
 $configData = [
     'DB_HOST' => $host,
     'DB_PORT' => $port,
@@ -56,14 +67,28 @@ $configData = [
     'updated_at' => date('Y-m-d H:i:s')
 ];
 
-if (file_put_contents($configFile, json_encode($configData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
+$jsonStr = json_encode($configData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+$writeSuccess = @file_put_contents($configFile, $jsonStr);
+
+if ($writeSuccess !== false) {
+    @chmod($configFile, 0777);
     echo json_encode([
         'success' => true,
         'message' => 'บันทึกการตั้งค่าการเชื่อมต่อฐานข้อมูลเรียบร้อยแล้ว!'
     ], JSON_UNESCAPED_UNICODE);
 } else {
+    // Fallback: Try saving to session if file system is completely read-only
+    if (session_status() === PHP_SESSION_NONE) {
+        @session_start();
+    }
+    $_SESSION['DB_HOST'] = $host;
+    $_SESSION['DB_PORT'] = $port;
+    $_SESSION['DB_USER'] = $user;
+    $_SESSION['DB_PASS'] = $pass;
+    $_SESSION['DB_NAME'] = $dbname;
+
     echo json_encode([
-        'success' => false,
-        'message' => 'ไม่สามารถเขียนไฟล์บันทึกการตั้งค่าได้ กรุณาตรวจสอบสิทธิ์ของไฟล์'
+        'success' => true,
+        'message' => 'บันทึกการตั้งค่าเข้าสู่ Session ชั่วคราวเรียบร้อยแล้ว! (คำแนะนำ: สั่ง chmod -R 777 config บนเซิร์ฟเวอร์เพื่อให้บันทึกถาวร)'
     ], JSON_UNESCAPED_UNICODE);
 }

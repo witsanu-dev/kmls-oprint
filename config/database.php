@@ -7,6 +7,10 @@
 // Set Timezone to Asia/Bangkok (Thailand)
 date_default_timezone_set('Asia/Bangkok');
 
+if (session_status() === PHP_SESSION_NONE) {
+    @session_start();
+}
+
 // Dynamic Config File path
 $configFile = __DIR__ . '/database_config.json';
 $dynConfig = [];
@@ -15,11 +19,17 @@ if (file_exists($configFile)) {
     $dynConfig = json_decode($jsonContent, true) ?: [];
 }
 
-define('DB_HOST', !empty($dynConfig['DB_HOST']) ? $dynConfig['DB_HOST'] : '10.250.100.201');
-define('DB_PORT', !empty($dynConfig['DB_PORT']) ? $dynConfig['DB_PORT'] : '3306');
-define('DB_USER', !empty($dynConfig['DB_USER']) ? $dynConfig['DB_USER'] : 'hxpkt');
-define('DB_PASS', isset($dynConfig['DB_PASS']) ? $dynConfig['DB_PASS'] : 'servkt');
-define('DB_NAME', !empty($dynConfig['DB_NAME']) ? $dynConfig['DB_NAME'] : 'hos'); // HOSxP default database name
+$dbHost = !empty($_SESSION['DB_HOST']) ? $_SESSION['DB_HOST'] : (!empty($dynConfig['DB_HOST']) ? $dynConfig['DB_HOST'] : '10.250.100.201');
+$dbPort = !empty($_SESSION['DB_PORT']) ? $_SESSION['DB_PORT'] : (!empty($dynConfig['DB_PORT']) ? $dynConfig['DB_PORT'] : '3306');
+$dbUser = !empty($_SESSION['DB_USER']) ? $_SESSION['DB_USER'] : (!empty($dynConfig['DB_USER']) ? $dynConfig['DB_USER'] : 'hxpkt');
+$dbPass = isset($_SESSION['DB_PASS']) ? $_SESSION['DB_PASS'] : (isset($dynConfig['DB_PASS']) ? $dynConfig['DB_PASS'] : 'servkt');
+$dbName = !empty($_SESSION['DB_NAME']) ? $_SESSION['DB_NAME'] : (!empty($dynConfig['DB_NAME']) ? $dynConfig['DB_NAME'] : 'hos');
+
+define('DB_HOST', $dbHost);
+define('DB_PORT', $dbPort);
+define('DB_USER', $dbUser);
+define('DB_PASS', $dbPass);
+define('DB_NAME', $dbName);
 define('DB_CHARSET', 'utf8');
 
 class Database {
