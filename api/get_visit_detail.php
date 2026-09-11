@@ -88,7 +88,7 @@ if (!empty(getDB())) {
                   LEFT OUTER JOIN patient p ON p.hn = o1.hn
                   LEFT OUTER JOIN pttype p2 ON p2.pttype = v1.pttype
                 WHERE {$whereClause}
-                ORDER BY o1.vstdate DESC, o1.vsttime DESC LIMIT 1";
+                ORDER BY o1.vn DESC LIMIT 1";
 
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
