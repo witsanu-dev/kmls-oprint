@@ -1,0 +1,214 @@
+/*
+ * Pharmacy Note OPD Card - Kamalasai Hospital
+ * Target: A5 Landscape (210mm x 148mm) — SINGLE PAGE, FULL BLEED
+ * Usable area with @page margin 4mm: ~202mm x 140mm
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700;800&display=swap');
+
+* {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+html, body {
+    font-family: 'Anuphan', sans-serif;
+    font-size: 10pt;
+    color: #000;
+    background: #f1f5f9;
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
+}
+
+/* ===== TOOLBAR (Screen Only) ===== */
+.print-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* ===== OPD PAGE WRAPPER ===== */
+.opd-page {
+    width: 210mm;
+    height: 148mm;
+    padding: 5mm 8mm;
+    margin: 8mm auto;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+/* ===== HEADER ===== */
+.opd-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2.5px solid #ea580c;
+    padding-bottom: 4px;
+    margin-bottom: 5px;
+    flex-shrink: 0;
+}
+
+.hospital-title {
+    font-size: 13pt;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.15;
+}
+
+.sub-title {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #ea580c;
+    margin-top: 1px;
+}
+
+.hn-print-badge {
+    background: #0f172a;
+    color: #fff;
+    padding: 4px 14px;
+    border-radius: 5px;
+    font-size: 14pt;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    white-space: nowrap;
+}
+
+.vn-label {
+    font-size: 8pt;
+    font-weight: 700;
+    text-align: right;
+    margin-top: 3px;
+    color: #334155;
+}
+
+/* ===== PATIENT BOX ===== */
+.patient-box {
+    border: 1px solid #cbd5e1;
+    border-left: 4px solid #ea580c;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    font-size: 9pt;
+    line-height: 1.55;
+    flex-shrink: 0;
+}
+
+.row-flex {
+    display: flex;
+    gap: 10px;
+}
+
+.row-flex .col {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.label-bold {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* ===== PHARMACY TABLE ===== */
+.pharmacy-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+    flex: 1; /* fills remaining space */
+}
+
+.pharmacy-table th,
+.pharmacy-table td {
+    border: 1px solid #94a3b8;
+    padding: 6px 8px;
+    vertical-align: top;
+}
+
+.pharmacy-table th {
+    background-color: #fff7ed;
+    color: #c2410c;
+    font-weight: 700;
+    border-bottom: 2px solid #ea580c;
+    font-size: 9pt;
+}
+
+.pharmacy-table tbody td {
+    font-size: 9.5pt;
+}
+
+/* ===== BARCODE + SIGNATURE ===== */
+.bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 5px;
+    flex-shrink: 0;
+}
+
+.signature-block {
+    display: flex;
+    gap: 14mm;
+    align-items: flex-end;
+}
+
+.signature-slot {
+    text-align: center;
+    min-width: 60mm;
+}
+
+.sig-label {
+    font-size: 8.5pt;
+    color: #475569;
+    margin-bottom: 12mm; /* tall space for actual handwritten signature */
+}
+
+.signature-line {
+    display: block;
+    border-bottom: 1px solid #000;
+    width: 60mm;
+    margin: 0 auto;
+}
+
+.sig-name {
+    font-size: 8.5pt;
+    font-weight: 600;
+    margin-top: 3px;
+}
+
+/* ===== PRINT MEDIA ===== */
+@media print {
+    html, body {
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .no-print,
+    .print-toolbar {
+        display: none !important;
+    }
+
+    .opd-page {
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 5mm 8mm !important;
+        border: none !important;
+        box-shadow: none !important;
+        page-break-after: avoid;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+}
+
+/* Paper class helpers (screen preview sizing) */
+.page-size-a5-landscape { width: 210mm; height: 148mm; }
+.page-size-a5-portrait  { width: 148mm; height: 210mm; }
+.page-size-a4-portrait  { width: 210mm; height: 297mm; }

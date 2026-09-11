@@ -1,0 +1,8 @@
+{
+    "DB_HOST": "10.250.100.201",
+    "DB_PORT": "3306",
+    "DB_USER": "hxpkt",
+    "DB_PASS": "servkt",
+    "DB_NAME": "hos",
+    "updated_at": "2026-09-11 01:03:28"
+}

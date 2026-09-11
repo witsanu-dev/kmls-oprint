@@ -1,0 +1,890 @@
+/* 
+ * Pharmacy Note OPD Card System - Kamalasai Hospital
+ * Theme: Vibrant Pastel Orange & White Minimal (Tailwind-like rounded-md everywhere)
+ * Font: Anuphan | Icons: Lucide (No Emojis)
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap');
+
+/* ===== Design Tokens ===== */
+:root {
+    --orange-50:  #fff7ed;
+    --orange-100: #ffedd5;
+    --orange-200: #fed7aa;
+    --orange-300: #fdba74;
+    --orange-400: #fb923c;
+    --orange-500: #f97316;
+    --orange-600: #ea580c;
+    --orange-700: #c2410c;
+
+    --slate-50:  #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-500: #64748b;
+    --slate-700: #334155;
+    --slate-900: #0f172a;
+
+    --white: #ffffff;
+    --danger: #ef4444;
+    --danger-bg: #fef2f2;
+    --danger-border: #fecaca;
+    --success: #10b981;
+
+    --shadow-orange: 0 4px 14px rgba(249,115,22,0.18);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+
+    /* Strict Rule: Use rounded-md (6px ~ 8px) everywhere */
+    --radius-xl: 6px;
+    --radius-lg: 6px;
+    --radius-md: 6px;
+    --radius-sm: 6px;
+}
+
+/* ===== Base Reset ===== */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    font-family: 'Anuphan', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(160deg, #fff7ed 0%, #fff3e8 40%, #f8fafc 100%);
+    color: var(--slate-700);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* All components explicitly rounded-md */
+.rounded-md, .card-custom, .form-control, .form-select, .btn, .badge, 
+.patient-banner, .hn-display-box, .barcode-box, .preview-doc, .preview-drug-box,
+.select2-container--bootstrap-5 .select2-selection, .select2-dropdown {
+    border-radius: 6px !important;
+}
+
+/* ===== Navbar ===== */
+.navbar-custom {
+    background: var(--white);
+    border-bottom: 3px solid var(--orange-400);
+    padding: 0.7rem 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    box-shadow: 0 2px 12px rgba(249,115,22,0.10);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    min-height: 60px;
+}
+
+/* Brand link */
+.navbar-brand, .navbar-brand-responsive {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: var(--slate-900);
+    flex: 1 1 0;
+    min-width: 0;  /* allow shrinking */
+    overflow: hidden;
+}
+
+.navbar-brand .brand-icon,
+.navbar-brand-responsive .brand-icon {
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--orange-400), var(--orange-600));
+    padding: 0.45rem;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-orange);
+    width: 36px;
+    height: 36px;
+}
+
+.brand-text-wrap {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.navbar-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--slate-900);
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.brand-sub {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--slate-500);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.brand-sub-highlight {
+    color: var(--orange-600);
+    font-weight: 700;
+}
+
+.brand-sub-sep {
+    color: var(--slate-300);
+    margin: 0 5px;
+}
+
+/* Actions section (right side) */
+.navbar-actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#dbStatusBadge {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.hospital-badge {
+    background: linear-gradient(135deg, var(--orange-400), var(--orange-500));
+    color: var(--white);
+    padding: 0.3rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 8px rgba(249,115,22,0.25);
+}
+
+/* ===== Main Wrapper ===== */
+.main-wrapper {
+    max-width: 1440px;
+    margin: 1.5rem auto;
+    padding: 0 1.25rem 2rem;
+}
+
+/* ===== Cards ===== */
+.card-custom {
+    background: var(--white);
+    border: 1px solid var(--orange-100);
+    border-radius: 6px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.4rem;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-custom:hover {
+    box-shadow: var(--shadow-orange);
+    border-color: var(--orange-200);
+}
+
+.card-header-custom {
+    background: linear-gradient(to right, var(--orange-50), var(--white));
+    padding: 0.85rem 1.35rem;
+    border-bottom: 1px solid var(--orange-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-header-custom .title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: var(--slate-900);
+}
+
+.card-header-custom .title svg {
+    color: var(--orange-500);
+}
+
+.card-body-custom {
+    padding: 1.35rem;
+}
+
+/* ===== HN Display Box ===== */
+.hn-display-box {
+    background: linear-gradient(135deg, var(--orange-500) 0%, var(--orange-600) 100%);
+    color: var(--white);
+    padding: 0.9rem 1.25rem;
+    border-radius: 6px;
+    text-align: left;
+    box-shadow: var(--shadow-orange);
+    position: relative;
+    overflow: hidden;
+}
+
+.hn-display-box .hn-watermark-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 68px;
+    height: 68px;
+    color: rgba(255, 255, 255, 0.22);
+    pointer-events: none;
+    line-height: 1;
+    stroke-width: 1.5px;
+}
+
+.hn-display-box .hn-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    opacity: 0.9;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.hn-display-box .hn-number {
+    font-size: 2.05rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-copy-hn:hover {
+    background: rgba(255, 255, 255, 0.4) !important;
+    transform: scale(1.08);
+}
+
+/* ===== Patient Info Banner ===== */
+.patient-banner {
+    background: linear-gradient(135deg, var(--orange-50) 0%, #fefcf9 100%);
+    border: 1px solid var(--orange-100);
+    border-left: 4px solid var(--orange-400);
+    padding: 1rem 1.25rem;
+    border-radius: 6px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.patient-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.patient-info-item .label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--orange-600);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.patient-info-item .label svg {
+    width: 13px; height: 13px;
+    flex-shrink: 0;
+}
+
+.patient-info-item .value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--slate-900);
+}
+
+/* ===== Allergy Badge ===== */
+.badge-allergy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: var(--danger-bg);
+    color: var(--danger);
+    border: 1px solid var(--danger-border);
+    padding: 0.2rem 0.65rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.88rem;
+}
+
+.badge-allergy.safe {
+    background: #f0fdf4;
+    color: var(--success);
+    border-color: #bbf7d0;
+}
+
+/* ===== Barcode Container ===== */
+.barcode-box {
+    background: var(--white);
+    border: 1.5px dashed var(--orange-200);
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    text-align: center;
+    background: linear-gradient(135deg, #fffbf7, var(--white));
+}
+
+.barcode-box svg {
+    max-width: 100%;
+    height: 46px;
+}
+
+/* ===== Form Elements ===== */
+.form-label {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--slate-700);
+    margin-bottom: 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.form-label svg {
+    width: 15px; height: 15px;
+    flex-shrink: 0;
+}
+
+.form-control, .form-select {
+    border-radius: 6px;
+    border: 1.5px solid var(--slate-200);
+    padding: 0.55rem 0.85rem;
+    font-size: 0.92rem;
+    font-family: 'Anuphan', sans-serif;
+    background: var(--white);
+    color: var(--slate-900);
+    transition: all 0.2s;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--orange-400);
+    box-shadow: 0 0 0 3px rgba(249,115,22,0.15);
+    outline: none;
+}
+
+.form-control:disabled, .form-select:disabled {
+    background: var(--slate-50);
+    color: var(--slate-500);
+    border-color: var(--slate-200);
+}
+
+.form-text {
+    font-size: 0.8rem;
+    color: var(--slate-500);
+    margin-top: 0.3rem;
+}
+
+/* ===== Modern Minimal Buttons ===== */
+.btn-orange {
+    background: linear-gradient(135deg, var(--orange-500), var(--orange-600));
+    color: var(--white);
+    border: none;
+    padding: 0.55rem 1.3rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-family: 'Anuphan', sans-serif;
+    font-size: 0.92rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(249,115,22,0.3);
+}
+
+.btn-orange:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--orange-600), var(--orange-700));
+    box-shadow: 0 4px 12px rgba(249,115,22,0.4);
+    transform: translateY(-1px);
+    color: var(--white);
+}
+
+.btn-orange:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-orange svg { width: 16px; height: 16px; }
+
+/* Modern Minimal Print Button */
+.btn-print-minimal {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #ffffff;
+    border: 1px solid #334155;
+    padding: 0.5rem 1.1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-family: 'Anuphan', sans-serif;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 5px rgba(15,23,42,0.2);
+}
+
+.btn-print-minimal:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: #475569;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(15,23,42,0.3);
+}
+
+.btn-print-minimal:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    background: #94a3b8;
+    border-color: #cbd5e1;
+}
+
+.btn-print-minimal svg { width: 16px; height: 16px; color: #fb923c; }
+
+/* ===== Live Preview Card ===== */
+.preview-doc {
+    background: var(--white);
+    border: 1.5px solid var(--orange-200);
+    border-radius: 6px;
+    padding: 1.25rem;
+    font-size: 13.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.preview-doc::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(to right, var(--orange-400), var(--orange-300));
+}
+
+.preview-doc .preview-hospital {
+    text-align: center;
+    border-bottom: 1px solid var(--orange-100);
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.85rem;
+}
+
+.preview-doc .preview-hospital strong {
+    font-size: 1rem;
+    color: var(--orange-600);
+}
+
+.preview-drug-box {
+    background: linear-gradient(135deg, var(--orange-50), #fffbf5);
+    border: 1.5px solid var(--orange-200);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin: 0.75rem 0;
+}
+
+.preview-drug-box .drug-title {
+    font-weight: 700;
+    color: var(--orange-700);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* ===== Select2 Override (rounded-md) ===== */
+
+/* CRITICAL: prevent Select2 from overflowing its container */
+.select2-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection {
+    border-radius: 6px !important;
+    min-height: 38px !important;
+    border: 1.5px solid var(--slate-200) !important;
+    background: var(--white) !important;
+    font-family: 'Anuphan', sans-serif !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    padding-top: 0.3rem !important;
+    font-size: 0.9rem !important;
+    color: var(--slate-900) !important;
+    font-family: 'Anuphan', sans-serif !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+}
+
+.select2-container--bootstrap-5.select2-container--focus .select2-selection,
+.select2-container--bootstrap-5.select2-container--open .select2-selection {
+    border-color: var(--orange-400) !important;
+    box-shadow: 0 0 0 3px rgba(249,115,22,0.15) !important;
+}
+
+.select2-dropdown {
+    border: 1.5px solid var(--orange-200) !important;
+    border-radius: 6px !important;
+    box-shadow: var(--shadow-md) !important;
+    font-family: 'Anuphan', sans-serif !important;
+    z-index: 9999 !important;
+    max-width: 100vw !important;
+}
+
+.select2-results__option--highlighted {
+    background: var(--orange-50) !important;
+    color: var(--orange-700) !important;
+}
+
+.select2-results__option--selected {
+    background: var(--orange-100) !important;
+    color: var(--orange-700) !important;
+}
+
+/* Custom Select2 Style for Paper Size */
+.select2-paper-size + .select2-container--bootstrap-5 .select2-selection {
+    min-height: 38px !important;
+    padding-top: 0px !important;
+}
+.select2-paper-size + .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    padding-top: 0.35rem !important;
+    font-size: 0.92rem !important;
+}
+
+/* Ensure form groups containing Select2 don't overflow */
+.mb-3, .mb-4 {
+    position: relative;
+    overflow: visible; /* allow dropdown to overflow but not the select itself */
+}
+
+.card-body-custom .row, .card-body-custom .col-md-6,
+.card-body-custom .col-md-8, .card-body-custom .col-md-4 {
+    min-width: 0; /* prevent flex children from exceeding parent */
+}
+
+
+/* ===== Inline Status Badges ===== */
+.db-badge-teal {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #f0fdfa;
+    color: #0d9488;
+    border: 1px solid #99f6e4;
+    padding: 0.3rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(13,148,136,0.08);
+}
+
+.badge-pdpa-green {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.db-badge-warn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: var(--orange-50);
+    color: var(--orange-700);
+    border: 1px solid var(--orange-200);
+    padding: 0.3rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* ===== Search Card Header ===== */
+.search-card {
+    background: linear-gradient(135deg, var(--white) 60%, var(--orange-50) 100%);
+    border: 1px solid var(--orange-100);
+    border-top: 4px solid var(--orange-400);
+}
+
+/* ===== Section Divider ===== */
+.section-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--orange-100);
+    color: var(--orange-700);
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    letter-spacing: 0.3px;
+}
+
+/* ===== Spin Animation (for DB test button) ===== */
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.spin-anim { animation: spin 0.8s linear infinite; }
+
+/* ===== Clear Form Button Hover Effect ===== */
+#btnClearAllForm {
+    transition: all 0.2s ease-in-out;
+}
+#btnClearAllForm:hover {
+    background-color: #ef4444 !important;
+    border-color: #ef4444 !important;
+    color: #ffffff !important;
+}
+#btnClearAllForm:hover i,
+#btnClearAllForm:hover svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+/* ===== Table: responsive horizontal scrollbar (global) ===== */
+.table-responsive {
+    overflow-x: auto !important;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    max-width: 100%;
+    display: block;
+}
+
+/* DataTable: fixed min-width so all columns remain readable without clipping */
+#pharmacyNoteTable {
+    min-width: 1100px !important;
+    width: 100% !important;
+}
+
+/* ===== Table Active Selected Row Styling ===== */
+#pharmacyNoteTable tbody tr.table-active-selected {
+    background-color: #fff7ed !important; /* light warm orange tint */
+    box-shadow: inset 4px 0 0 #f97316 !important; /* orange left border accent */
+    transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+#pharmacyNoteTable tbody tr.table-active-selected td {
+    background-color: #fff7ed !important;
+    font-weight: 500;
+}
+
+/* Scrollbar styling — thin, modern, orange theme */
+.table-responsive::-webkit-scrollbar,
+.dataTables_scrollBody::-webkit-scrollbar { height: 8px; width: 8px; }
+.table-responsive::-webkit-scrollbar-track,
+.dataTables_scrollBody::-webkit-scrollbar-track { background: var(--slate-100); border-radius: 6px; }
+.table-responsive::-webkit-scrollbar-thumb,
+.dataTables_scrollBody::-webkit-scrollbar-thumb { background: var(--orange-300); border-radius: 6px; }
+.table-responsive::-webkit-scrollbar-thumb:hover,
+.dataTables_scrollBody::-webkit-scrollbar-thumb:hover { background: var(--orange-500); }
+.table-responsive { scrollbar-width: thin; scrollbar-color: var(--orange-300) var(--slate-100); }
+
+/* ===== Form card: prevent overflow from children ===== */
+.card-custom { overflow: hidden; } /* clip content inside card bounds */
+.card-body-custom { overflow: visible; } /* but allow Select2 dropdowns */
+
+/* Ensure all Bootstrap columns within card-body don’t overflow */
+.card-body-custom [class*="col-"] { min-width: 0; }
+
+/* Form row: wraps properly on small widths */
+.card-body-custom .row { margin-left: 0; margin-right: 0; }
+
+/* ===== Custom Orange Buttons ===== */
+.btn-orange {
+    background-color: #f97316;
+    color: #ffffff;
+    border: 1px solid #ea580c;
+    transition: all 0.2s ease;
+}
+.btn-orange:hover, .btn-orange:focus {
+    background-color: #ea580c;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
+}
+
+.btn-outline-orange {
+    background-color: transparent;
+    color: #f97316;
+    border: 1px solid #f97316;
+    transition: all 0.2s ease;
+}
+.btn-outline-orange:hover, .btn-outline-orange:focus {
+    background-color: #f97316;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
+}
+
+/* ===== Responsive — Desktop Large (≥1400px) ===== */
+@media (min-width: 1400px) {
+    .main-wrapper { max-width: 1440px; padding: 0 2rem 2.5rem; }
+}
+
+/* ===== Responsive — Tablet Landscape (≤1199px) ===== */
+@media (max-width: 1199px) {
+    .main-wrapper { max-width: 100%; }
+    .card-body-custom { padding: 1.1rem; }
+    .hn-display-box .hn-number { font-size: 1.75rem; }
+}
+
+/* ===== Responsive — Tablet Portrait (≤991px) ===== */
+@media (max-width: 991px) {
+    .main-wrapper { padding: 0 1rem 2rem; margin: 1rem auto; }
+    .navbar-custom { padding: 0.6rem 1.25rem; gap: 0.75rem; }
+    .navbar-title { font-size: 0.98rem; }
+    .brand-sub { display: none; } /* hide subtitle on tablet */
+
+    /* Patient banner: 2 columns */
+    .patient-banner { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+    /* HN box */
+    .hn-display-box .hn-number { font-size: 1.55rem; }
+    .hn-display-box { padding: 0.75rem 1rem; }
+
+    /* Card header on tablet */
+    .card-header-custom { padding: 0.7rem 1rem; }
+    .card-header-custom .title { font-size: 0.95rem; }
+
+    /* Search bar: stack paper size + print button vertically */
+    .col-md-5 .d-flex.gap-2.justify-content-end { flex-wrap: wrap; justify-content: flex-start; }
+    .col-md-5 .d-flex > div[style*="175px"] { width: 100% !important; }
+
+    /* Barcode box */
+    .barcode-box { padding: 0.5rem 0.75rem; }
+    .barcode-box svg { height: 38px; }
+
+    /* Preview doc */
+    .preview-doc { padding: 1rem; }
+}
+
+/* ===== Responsive — Mobile (≤767px) ===== */
+@media (max-width: 767px) {
+    body { font-size: 14px; }
+
+    .main-wrapper { padding: 0 0.65rem 1.5rem; margin: 0.65rem auto; }
+
+    /* Navbar: compact */
+    .navbar-custom { padding: 0.5rem 0.85rem; gap: 0.5rem; min-height: 52px; }
+    .navbar-brand .brand-icon,
+    .navbar-brand-responsive .brand-icon { width: 32px; height: 32px; padding: 0.38rem; }
+    .navbar-title { font-size: 0.88rem; }
+    .brand-sub { display: none; }
+    .db-badge-teal, .db-badge-warn { font-size: 0.72rem; padding: 0.22rem 0.5rem; gap: 0.25rem; }
+
+    /* Top banner row */
+    .main-wrapper > .d-flex.align-items-center.justify-content-between.mb-3 {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+    }
+    .main-wrapper > .d-flex > div:last-child { font-size: 0.78rem; }
+
+    /* Cards */
+    .card-custom { margin-bottom: 1rem; }
+    .card-body-custom { padding: 0.9rem; }
+    .card-header-custom { padding: 0.6rem 0.9rem; flex-wrap: wrap; gap: 0.4rem; }
+    .card-header-custom .title { font-size: 0.9rem; }
+
+    /* Search card: full-width stack */
+    .search-card .row.g-3 { gap: 0.75rem !important; }
+    .col-md-5 .d-flex.gap-2.justify-content-end {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    .col-md-5 .d-flex > div[style*="175px"] { width: 100% !important; }
+    .col-md-5 .d-flex > div > button { width: 100%; justify-content: center; }
+
+    /* Patient info row: HN full-width, name + barcode side-by-side */
+    .row.g-3.mb-3.align-items-center > .col-md-3 { order: 1; }
+    .row.g-3.mb-3.align-items-center > .col-md-5 { order: 2; }
+    .row.g-3.mb-3.align-items-center > .col-md-4 { order: 3; }
+
+    /* HN box: slightly smaller */
+    .hn-display-box .hn-number { font-size: 1.55rem; letter-spacing: 1px; }
+    .hn-display-box { padding: 0.7rem 1rem; }
+
+    /* Patient banner: 1 column on mobile */
+    .patient-banner { grid-template-columns: 1fr; gap: 0.6rem; padding: 0.75rem 1rem; }
+    .patient-info-item .value { font-size: 0.88rem; }
+
+    /* Barcode box */
+    .barcode-box { padding: 0.45rem 0.65rem; }
+    .barcode-box svg { height: 34px; max-width: 100%; }
+
+    /* Preview card: slightly narrower padding */
+    .preview-doc { padding: 0.85rem; font-size: 12.5px; }
+
+    /* Form labels & controls */
+    .form-label { font-size: 0.82rem; }
+    .form-control, .form-select { font-size: 0.87rem; padding: 0.48rem 0.75rem; }
+
+    /* Print tools card buttons: full width */
+    .col-6 > .btn { font-size: 0.82rem; padding: 0.5rem 0.5rem; }
+
+    /* DataTable: scrollable both axes */
+    .table-responsive {
+        overflow-x: auto;
+        overflow-y: auto;
+        max-height: 420px; /* vertical scroll if many rows */
+        border-radius: 6px;
+    }
+    #pharmacyNoteTable { font-size: 0.8rem; min-width: 640px; }
+    #pharmacyNoteTable th, #pharmacyNoteTable td { padding: 0.4rem 0.5rem; white-space: nowrap; }
+    #pharmacyNoteTable thead th { position: sticky; top: 0; z-index: 2; background: #f8fafc; }
+
+    /* Modal: full-width on mobile */
+    .modal-dialog { margin: 0.5rem; max-width: calc(100vw - 1rem) !important; }
+
+    /* Select2: ensure full-width on mobile, no overflow */
+    .select2-container { max-width: 100% !important; }
+    .select2-dropdown { max-width: calc(100vw - 1.3rem) !important; }
+}
+
+/* ===== Responsive — Small Mobile (≤479px) ===== */
+@media (max-width: 479px) {
+    .navbar-custom { padding: 0.45rem 0.6rem; gap: 0.35rem; min-height: 48px; }
+    .navbar-brand .brand-icon,
+    .navbar-brand-responsive .brand-icon { width: 28px; height: 28px; padding: 0.3rem; }
+    .navbar-title { font-size: 0.8rem; }
+    /* Hide badge label text on very small screens — show icon only */
+    .badge-label { display: none; }
+    .db-badge-teal, .db-badge-warn { padding: 0.25rem 0.45rem; }
+
+    .main-wrapper { padding: 0 0.5rem 1.25rem; }
+    .card-body-custom { padding: 0.75rem; }
+    .hn-display-box .hn-number { font-size: 1.35rem; }
+    .patient-banner { padding: 0.6rem 0.75rem; }
+    .preview-doc { padding: 0.7rem; font-size: 12px; }
+
+    /* Stagger print buttons to full row each */
+    .col-6 { flex: 0 0 100%; max-width: 100%; }
+    .row.g-2 .col-6 { flex: 0 0 100%; max-width: 100%; }
+}
+
