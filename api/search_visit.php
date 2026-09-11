@@ -116,19 +116,19 @@ if (!empty(getDB())) {
                 }
             }
 
-            // 3. Fallback กรณีค้นด้วย partial VN
+            // 3. Fallback กรณีค้นด้วย VN ตรงๆ หรือ HN
             if (empty($visits) && !empty($cleanTerm)) {
                 $vSql2 = "SELECT o1.vn, o1.hn, o1.vstdate, o1.vsttime,
                                  CONCAT(IFNULL(p.pname,''), IFNULL(p.fname,''), ' ', IFNULL(p.lname,'')) AS patient_name,
                                  p.cid, TIMESTAMPDIFF(YEAR, p.birthday, CURDATE()) AS age
                           FROM ovst o1
                           LEFT JOIN patient p ON p.hn = o1.hn
-                          WHERE o1.vn LIKE :q_vn OR o1.hn = :hn1 OR o1.hn = :hn2
+                          WHERE o1.vn = :q_vn OR o1.hn = :hn1 OR o1.hn = :hn2
                           ORDER BY o1.vn DESC
                           LIMIT 2";
                 $vStmt2 = $db->prepare($vSql2);
                 $vStmt2->execute([
-                    ':q_vn' => $cleanTerm . '%',
+                    ':q_vn' => $cleanTerm,
                     ':hn1'  => $hnRaw,
                     ':hn2'  => $hnPad7
                 ]);
