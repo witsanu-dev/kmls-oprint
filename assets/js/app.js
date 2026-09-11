@@ -48,16 +48,16 @@ $(document).ready(function () {
     // 1. Initialize Lucide Icons (already loaded in <head>)
     lucide.createIcons();
 
-    // 2. Initialize Visit Live Search (Select2) with minimumInputLength: 0 for instant load
+    // 2. Initialize Visit Live Search (Select2) with minimumInputLength: 2 to prevent server overload
     $('#visitSearchSelect').select2({
         theme: 'bootstrap-5',
-        placeholder: '⚡ คีย์ HN / ชื่อ-สกุล / เลขบัตร / VN ค้นหาได้ทันที...',
+        placeholder: '⚡ พิมพ์ HN / ชื่อ-นามสกุล / เลขบัตรประชาชน / VN เพื่อค้นหา...',
         allowClear: true,
-        minimumInputLength: 0,
+        minimumInputLength: 2,
         ajax: {
             url: 'api/search_visit.php',
             dataType: 'json',
-            delay: 150,
+            delay: 350,
             data: function (params) {
                 return { q: params.term || '' };
             },

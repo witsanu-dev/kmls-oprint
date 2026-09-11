@@ -3,6 +3,7 @@
 ob_start();
 error_reporting(0);
 ini_set('display_errors', '0');
+set_time_limit(3); // Hard limit 3 seconds execution
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -10,6 +11,13 @@ require_once __DIR__ . '/../config/database.php';
 
 $term = isset($_GET['q']) ? trim($_GET['q']) : (isset($_GET['term']) ? trim($_GET['term']) : '');
 $results = [];
+
+// Do not query DB if term is less than 2 chars (Safety Protection against server hang)
+if (mb_strlen($term) < 2) {
+    ob_clean();
+    echo json_encode(['results' => [], 'mock' => false], JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
 if (!empty(getDB())) {
     try {
