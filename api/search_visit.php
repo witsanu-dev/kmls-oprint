@@ -17,14 +17,14 @@ if (!empty(getDB())) {
         $visits = [];
         
         if (empty($term)) {
-            // ดึง 30 visit ล่าสุดเรียงตามวันเวลาตรวจแบบรวดเร็วที่สุด
+            // ดึง 2 visit ล่าสุดเรียงตามวันเวลาตรวจแบบรวดเร็วที่สุดผ่าน Index
             $sql = "SELECT o1.vn, o1.hn, o1.vstdate, o1.vsttime,
                            CONCAT(IFNULL(p.pname,''), IFNULL(p.fname,''), ' ', IFNULL(p.lname,'')) AS patient_name,
                            p.cid, TIMESTAMPDIFF(YEAR, p.birthday, CURDATE()) AS age
                     FROM ovst o1
                     LEFT JOIN patient p ON p.hn = o1.hn
-                    ORDER BY o1.vstdate DESC, o1.vsttime DESC
-                    LIMIT 30";
+                    ORDER BY o1.vn DESC
+                    LIMIT 2";
             $stmt = $db->query($sql);
             $visits = $stmt->fetchAll();
         } else {
@@ -42,77 +42,87 @@ if (!empty(getDB())) {
             $hnPad7 = !empty($numericTerm) ? sprintf("%07d", intval($numericTerm)) : $cleanTerm;
             $hnPad9 = !empty($numericTerm) ? sprintf("%09d", intval($numericTerm)) : $cleanTerm;
 
-            // 1. ค้นหาจาก patient ก่อน เพื่อหา HN ทั้งหมดของคนไข้รายนี้ (ไม่จำกัดเฉพาะต้องมี visit วันนี้)
-            $matchingHns = [];
-            
-            // ค้นหา patient
-            $pSql = "SELECT hn FROM patient 
-                     WHERE hn = :hn1 OR hn = :hn2 OR hn = :hn3 OR hn = :hn4 
-                        OR cid = :cid 
-                        OR cid LIKE :cid_like";
-            $pParams = [
-                ':hn1'      => $hnRaw,
-                ':hn2'      => $hnInt,
-                ':hn3'      => $hnPad7,
-                ':hn4'      => $hnPad9,
-                ':cid'      => $numericTerm,
-                ':cid_like' => '%' . $cleanTerm . '%'
-            ];
-
-            if (!empty($lname)) {
-                $pSql .= " OR (fname LIKE :fname AND lname LIKE :lname)";
-                $pParams[':fname'] = '%' . $fname . '%';
-                $pParams[':lname'] = '%' . $lname . '%';
-            } else {
-                $pSql .= " OR fname LIKE :fname OR lname LIKE :lname OR CONCAT(pname, fname, ' ', lname) LIKE :fullname";
-                $pParams[':fname']    = '%' . $cleanTerm . '%';
-                $pParams[':lname']    = '%' . $cleanTerm . '%';
-                $pParams[':fullname'] = '%' . $cleanTerm . '%';
+            // 1. ตรวจสอบการค้นหาตรงด้วย VN (12 หลัก) หรือ HN (ตรงตัว) ก่อนเพื่อความเร็วสูงสุด 1ms
+            if (strlen($numericTerm) >= 10) {
+                // ค้นด้วย VN ตรงๆ ก่อน
+                $vSqlDirect = "SELECT o1.vn, o1.hn, o1.vstdate, o1.vsttime,
+                                     CONCAT(IFNULL(p.pname,''), IFNULL(p.fname,''), ' ', IFNULL(p.lname,'')) AS patient_name,
+                                     p.cid, TIMESTAMPDIFF(YEAR, p.birthday, CURDATE()) AS age
+                              FROM ovst o1
+                              LEFT JOIN patient p ON p.hn = o1.hn
+                              WHERE o1.vn = :vn OR p.cid = :cid
+                              ORDER BY o1.vn DESC
+                              LIMIT 2";
+                $vStmtDir = $db->prepare($vSqlDirect);
+                $vStmtDir->execute([':vn' => $cleanTerm, ':cid' => $numericTerm]);
+                $visits = $vStmtDir->fetchAll();
             }
 
-            $pStmt = $db->prepare($pSql);
-            $pStmt->execute($pParams);
-            $pRows = $pStmt->fetchAll();
+            // 2. ถ้ายังไม่เจอ ให้ค้นหาจาก patient ด้วย Indexed Columns (hn, cid, fname, lname)
+            if (empty($visits)) {
+                $matchingHns = [];
+                $pSql = "SELECT hn FROM patient WHERE hn = :hn1 OR hn = :hn2 OR hn = :hn3 OR hn = :hn4 OR cid = :cid";
+                $pParams = [
+                    ':hn1' => $hnRaw,
+                    ':hn2' => $hnInt,
+                    ':hn3' => $hnPad7,
+                    ':hn4' => $hnPad9,
+                    ':cid' => $numericTerm
+                ];
 
-            foreach ($pRows as $pr) {
-                if (!empty($pr['hn'])) {
-                    $matchingHns[] = $pr['hn'];
+                if (!empty($lname)) {
+                    $pSql .= " OR (fname LIKE :fname AND lname LIKE :lname)";
+                    $pParams[':fname'] = $fname . '%';
+                    $pParams[':lname'] = $lname . '%';
+                } else if (mb_strlen($cleanTerm) >= 2) {
+                    $pSql .= " OR fname LIKE :fname OR lname LIKE :lname";
+                    $pParams[':fname'] = $cleanTerm . '%';
+                    $pParams[':lname'] = $cleanTerm . '%';
+                }
+
+                $pSql .= " LIMIT 5";
+                $pStmt = $db->prepare($pSql);
+                $pStmt->execute($pParams);
+                $pRows = $pStmt->fetchAll();
+
+                foreach ($pRows as $pr) {
+                    if (!empty($pr['hn'])) {
+                        $matchingHns[] = $pr['hn'];
+                    }
+                }
+
+                // ดึง 1-2 visit ล่าสุดของ HN ที่เจอ
+                if (!empty($matchingHns)) {
+                    $inClause = implode(',', array_fill(0, count($matchingHns), '?'));
+                    $vSql = "SELECT o1.vn, o1.hn, o1.vstdate, o1.vsttime,
+                                    CONCAT(IFNULL(p.pname,''), IFNULL(p.fname,''), ' ', IFNULL(p.lname,'')) AS patient_name,
+                                    p.cid, TIMESTAMPDIFF(YEAR, p.birthday, CURDATE()) AS age
+                             FROM ovst o1
+                             LEFT JOIN patient p ON p.hn = o1.hn
+                             WHERE o1.hn IN ($inClause)
+                             ORDER BY o1.vn DESC
+                             LIMIT 2";
+                    $vStmt = $db->prepare($vSql);
+                    $vStmt->execute($matchingHns);
+                    $visits = $vStmt->fetchAll();
                 }
             }
 
-            // 2. ดึง visit ล่าสุดของ HN ที่เจอ หรือค้นด้วย VN ตรงๆ
-            if (!empty($matchingHns)) {
-                // Construct IN clause dynamically
-                $inClause = implode(',', array_fill(0, count($matchingHns), '?'));
-                $vSql = "SELECT o1.vn, o1.hn, o1.vstdate, o1.vsttime,
-                                CONCAT(IFNULL(p.pname,''), IFNULL(p.fname,''), ' ', IFNULL(p.lname,'')) AS patient_name,
-                                p.cid, TIMESTAMPDIFF(YEAR, p.birthday, CURDATE()) AS age
-                         FROM ovst o1
-                         LEFT JOIN patient p ON p.hn = o1.hn
-                         WHERE o1.hn IN ($inClause)
-                         ORDER BY o1.vstdate DESC, o1.vsttime DESC
-                         LIMIT 30";
-                $vStmt = $db->prepare($vSql);
-                $vStmt->execute($matchingHns);
-                $visits = $vStmt->fetchAll();
-            }
-
-            // 3. ถ้ายังไม่พบจาก patient (เผื่อกรณีไม่มีในตาราง patient แต่มีใน ovst หรือค้นด้วย VN)
-            if (empty($visits)) {
+            // 3. Fallback กรณีค้นด้วย partial VN
+            if (empty($visits) && !empty($cleanTerm)) {
                 $vSql2 = "SELECT o1.vn, o1.hn, o1.vstdate, o1.vsttime,
                                  CONCAT(IFNULL(p.pname,''), IFNULL(p.fname,''), ' ', IFNULL(p.lname,'')) AS patient_name,
                                  p.cid, TIMESTAMPDIFF(YEAR, p.birthday, CURDATE()) AS age
                           FROM ovst o1
                           LEFT JOIN patient p ON p.hn = o1.hn
-                          WHERE o1.vn LIKE :q_vn OR o1.hn = :hn1 OR o1.hn = :hn2 OR o1.hn = :hn3
-                          ORDER BY o1.vstdate DESC, o1.vsttime DESC
-                          LIMIT 30";
+                          WHERE o1.vn LIKE :q_vn OR o1.hn = :hn1 OR o1.hn = :hn2
+                          ORDER BY o1.vn DESC
+                          LIMIT 2";
                 $vStmt2 = $db->prepare($vSql2);
                 $vStmt2->execute([
-                    ':q_vn' => '%' . $cleanTerm . '%',
+                    ':q_vn' => $cleanTerm . '%',
                     ':hn1'  => $hnRaw,
-                    ':hn2'  => $hnInt,
-                    ':hn3'  => $hnPad7
+                    ':hn2'  => $hnPad7
                 ]);
                 $visits = $vStmt2->fetchAll();
             }
